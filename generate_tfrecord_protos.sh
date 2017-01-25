@@ -45,9 +45,11 @@ fi
 BUILD_SCRIPT="./build_imagenet_data.py"
 IMAGENET_META_FILE="imagenet_metadata.txt"
 LABELS_FILE="imagenet_lsvrc_2015_synsets.txt"
-TRAIN_DIR="${DATA_DIR}/train"
-VALIDATION_DIR="${DATA_DIR}/validation"
-BBOX_FILE="${DATA_DIR}/imagenet_2012_bounding_boxes.csv"
+TRAIN_DIR="${DATA_DIR}/data/train"
+VALIDATION_DIR="${DATA_DIR}/data/validation"
+BBOX_FILE="${DATA_DIR}/bounding_boxes/imagenet_2012_bounding_boxes.csv"
+
+echo "Bounding boxes at ${BBOX_FILE}"
 
 "${BUILD_SCRIPT}" \
   --train_directory="${TRAIN_DIR}" \
@@ -56,3 +58,4 @@ BBOX_FILE="${DATA_DIR}/imagenet_2012_bounding_boxes.csv"
   --imagenet_metadata_file="${IMAGENET_META_FILE}" \
   --labels_file="${LABELS_FILE}" \
   --bounding_box_file="${BBOX_FILE}"
+
