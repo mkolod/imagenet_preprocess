@@ -49,11 +49,10 @@ TRAIN_DIR="${DATA_DIR}/train"
 VALIDATION_DIR="${DATA_DIR}/validation"
 BBOX_FILE="${DATA_DIR}/imagenet_2012_bounding_boxes.csv"
 
-${BUILD_SCRIPT} \
+"${BUILD_SCRIPT}" \
   --train_directory="${TRAIN_DIR}" \
   --validation_directory="${VALIDATION_DIR}" \
   --output_directory="${PROTO_OUT_DIR}" \
   --imagenet_metadata_file="${IMAGENET_META_FILE}" \
   --labels_file="${LABELS_FILE}" \
   --bounding_box_file="${BBOX_FILE}"
-
