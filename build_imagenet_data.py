@@ -93,7 +93,6 @@ import random
 import sys
 import threading
 
-
 import numpy as np
 import tensorflow as tf
 
@@ -104,7 +103,7 @@ tf.app.flags.DEFINE_string('validation_directory', '/tmp/',
 tf.app.flags.DEFINE_string('output_directory', '/tmp/',
                            'Output data directory')
 
-tf.app.flags.DEFINE_integer('train_shards', 1024,
+tf.app.flags.DEFINE_integer('train_shards', 4096,
                             'Number of shards in training TFRecord files.')
 tf.app.flags.DEFINE_integer('validation_shards', 128,
                             'Number of shards in validation TFRecord files.')
@@ -198,7 +197,7 @@ def _convert_to_example(filename, image_buffer, label, synset, human, bbox,
   xmax = []
   ymax = []
   for b in bbox:
-    assert len(b) == 4
+    assert len(b) == 4, "_convert_to_example: b should be exactly 4"
     # pylint: disable=expression-not-assigned
     [l.append(point) for l, point in zip([xmin, ymin, xmax, ymax], b)]
     # pylint: enable=expression-not-assigned
@@ -258,8 +257,8 @@ class ImageCoder(object):
   def decode_jpeg(self, image_data):
     image = self._sess.run(self._decode_jpeg,
                            feed_dict={self._decode_jpeg_data: image_data})
-    assert len(image.shape) == 3
-    assert image.shape[2] == 3
+    assert len(image.shape) == 3, "decode_jpeg: image.shape should be 3"
+    assert image.shape[2] == 3, "decode_jpeg: image.shape[2] should be 3"
     return image
 
 
@@ -331,10 +330,10 @@ def _process_image(filename, coder):
   image = coder.decode_jpeg(image_data)
 
   # Check that image converted to RGB
-  assert len(image.shape) == 3
+  assert len(image.shape) == 3, "process_image, len(image.shape) should be 3"
   height = image.shape[0]
   width = image.shape[1]
-  assert image.shape[2] == 3
+  assert image.shape[2] == 3, "process_image, image.shape[2] should be 3"
 
   return image_data, height, width
 
@@ -362,7 +361,7 @@ def _process_image_files_batch(coder, thread_index, ranges, name, filenames,
   # For instance, if num_shards = 128, and the num_threads = 2, then the first
   # thread would produce shards [0, 64).
   num_threads = len(ranges)
-  assert not num_shards % num_threads
+  assert not num_shards % num_threads, "_process_image_files_batch: num_sharts should be exactly divisible by number of threads"
   num_shards_per_batch = int(num_shards / num_threads)
 
   shard_ranges = np.linspace(ranges[thread_index][0],
@@ -426,10 +425,10 @@ def _process_image_files(name, filenames, synsets, labels, humans,
       box annotations for the image.
     num_shards: integer number of shards for this data set.
   """
-  assert len(filenames) == len(synsets)
-  assert len(filenames) == len(labels)
-  assert len(filenames) == len(humans)
-  assert len(filenames) == len(bboxes)
+  assert len(filenames) == len(synsets), "_process_image_files: len(filenames) == len(synsets)"
+  assert len(filenames) == len(labels), "_process_image_files: len(filenames) == len(labels)"
+  assert len(filenames) == len(humans), "_process_image_files: len(filenames) == len(humans)"
+  assert len(filenames) == len(bboxes), "_process_image_files: len(filenames) == len(bboxes)"
 
   # Break all images into batches with a [ranges[i][0], ranges[i][1]].
   spacing = np.linspace(0, len(filenames), FLAGS.num_threads + 1).astype(np.int)
@@ -627,7 +626,7 @@ def _build_synset_lookup(imagenet_metadata_file):
   for l in lines:
     if l:
       parts = l.strip().split('\t')
-      assert len(parts) == 2
+      assert len(parts) == 2, "_build_synset_lookup: len(parts) == 2"
       synset = parts[0]
       human = parts[1]
       synset_to_human[synset] = human
@@ -695,10 +694,10 @@ def main(unused_argv):
   image_to_bboxes = _build_bounding_box_lookup(FLAGS.bounding_box_file)
 
   # Run it!
-#  _process_dataset('validation', FLAGS.validation_directory,
-#                   FLAGS.validation_shards, synset_to_human, image_to_bboxes)
-#  _process_dataset('train', FLAGS.train_directory, FLAGS.train_shards,
-#                   synset_to_human, image_to_bboxes)
+  _process_dataset('validation', FLAGS.validation_directory,
+                   FLAGS.validation_shards, synset_to_human, image_to_bboxes)
+  _process_dataset('train', FLAGS.train_directory, FLAGS.train_shards,
+                   synset_to_human, image_to_bboxes)
 
 
 if __name__ == '__main__':

@@ -126,21 +126,20 @@ echo "Uncompressing individual train tar-balls in the training data to ${OUTPUT_
 
 SYNSET=${SYNSETS_FILE}
 
-# TODO: can also introspect tarballs to see if they need to be uncompressed.
-#while read SYNSET; do
-# echo "Processing: ${SYNSET}"
+while read SYNSET; do
+ echo "Processing: ${SYNSET}"
 
 # Create a directory and delete anything there.
-#  mkdir -p "${OUTPUT_PATH}/${SYNSET}"
-#  rm -rf "${OUTPUT_PATH}/${SYNSET}/*"
+  mkdir -p "${OUTPUT_PATH}/${SYNSET}"
+  rm -rf "${OUTPUT_PATH}/${SYNSET}/*"
 
 # Uncompress into the directory.
-#  tar xf "${TRAIN_TARBALL}" "${SYNSET}.tar"
-#  tar xf "${SYNSET}.tar" -C "${OUTPUT_PATH}/${SYNSET}/"
-#  rm -f "${SYNSET}.tar"
+  tar xf "${TRAIN_TARBALL}" "${SYNSET}.tar"
+  tar xf "${SYNSET}.tar" -C "${OUTPUT_PATH}/${SYNSET}/"
+  rm -f "${SYNSET}.tar"
 
-#  echo "Finished processing: ${SYNSET}"
-# done < "${SYNSETS_FILE}"
+  echo "Finished processing: ${SYNSET}"
+ done < "${SYNSETS_FILE}"
 
 # Bounding box label generation 
 
