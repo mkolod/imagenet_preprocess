@@ -123,6 +123,15 @@ tf.app.flags.DEFINE_string('labels_file',
                            'imagenet_lsvrc_2015_synsets.txt',
                            'Labels file')
 
+tf.app.flags.DEFINE_boolean('resize_images', True,
+                            'resize images to uniform size while creating protobufs')
+tf.app.flags.DEFINE_integer('new_height', 352, 
+                            'height after resizing')
+tf.app.flags.DEFINE_integer('new_width', 352,
+                            'width after resizing')
+tf.app.flags.DEFINE_integer('jpeg_q', 90,
+                            'JPEG Q factor (from 0 to 100)')
+
 # This file containing mapping from synset to human-readable label.
 # Assumes each line of the file looks like:
 #
@@ -255,12 +264,27 @@ class ImageCoder(object):
                           feed_dict={self._cmyk_data: image_data})
 
   def decode_jpeg(self, image_data):
-    image = self._sess.run(self._decode_jpeg,
-                           feed_dict={self._decode_jpeg_data: image_data})
-    assert len(image.shape) == 3, "decode_jpeg: image.shape should be 3"
-    assert image.shape[2] == 3, "decode_jpeg: image.shape[2] should be 3"
-    return image
 
+    decoded = self._decode_jpeg
+
+    if FLAGS.resize_images:
+      decoded = tf.image.resize_images(decoded, [FLAGS.new_height, FLAGS.new_width], method=tf.image.ResizeMethod.BILINEAR, align_corners=False)
+      encoded = tf.image.encode_jpeg(
+        decoded,
+        format='rgb',
+        quality=FLAGS.jpeg_q,
+        progressive=False,
+        optimize_size=True,
+        chroma_downsampling=True)
+      decoded, encoded = self._sess.run([decoded, encoded], feed_dict={self._decode_jpeg_data: image_data})
+    else: 
+      decoded = self._sess.run(decoded,
+                             feed_dict={self._decode_jpeg_data: image_data})
+      encoded = image_data
+
+    assert len(decoded.shape) == 3, "decode_jpeg: image.shape should be 3"
+    assert decoded.shape[2] == 3, "decode_jpeg: image.shape[2] should be 3"
+    return decoded, encoded
 
 def _is_png(filename):
   """Determine if a file contains a PNG format image.
@@ -327,7 +351,7 @@ def _process_image(filename, coder):
     image_data = coder.cmyk_to_rgb(image_data)
 
   # Decode the RGB JPEG.
-  image = coder.decode_jpeg(image_data)
+  image, image_data = coder.decode_jpeg(image_data)
 
   # Check that image converted to RGB
   assert len(image.shape) == 3, "process_image, len(image.shape) should be 3"

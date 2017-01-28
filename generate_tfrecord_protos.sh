@@ -31,8 +31,14 @@ LABELS_FILE="imagenet_lsvrc_2015_synsets.txt"
 TRAIN_DIR="${DATA_DIR}/data/train"
 VALIDATION_DIR="${DATA_DIR}/data/validation"
 BBOX_FILE="${DATA_DIR}/bounding_boxes/imagenet_2012_bounding_boxes.csv"
+RESIZE_IMAGES="true"
+NEW_HEIGHT="352"
+NEW_WIDTH="352"
+JPEG_Q="90"
 
 echo "Bounding boxes at ${BBOX_FILE}"
+
+python purge_mem_caches.py
 
   python "${BUILD_SCRIPT}" \
   --train_directory="${TRAIN_DIR}" \
@@ -40,5 +46,8 @@ echo "Bounding boxes at ${BBOX_FILE}"
   --output_directory="${PROTO_OUT_DIR}" \
   --imagenet_metadata_file="${IMAGENET_META_FILE}" \
   --labels_file="${LABELS_FILE}" \
-  --bounding_box_file="${BBOX_FILE}"
-
+  --bounding_box_file="${BBOX_FILE}" \
+  --resize_images="${RESIZE_IMAGES}" \
+  --new_height="${NEW_HEIGHT}" \
+  --new_width="${NEW_WIDTH}" \
+  --jpeg_q="${JPEG_Q}"
