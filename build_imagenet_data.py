@@ -268,7 +268,13 @@ class ImageCoder(object):
     decoded = self._decode_jpeg
 
     if FLAGS.resize_images:
-      decoded = tf.image.resize_images(decoded, [FLAGS.new_height, FLAGS.new_width], method=tf.image.ResizeMethod.BILINEAR, align_corners=False)
+
+      decoded = tf.image.resize_images(
+        decoded, 
+        [FLAGS.new_height, FLAGS.new_width],
+        method=tf.image.ResizeMethod.BILINEAR, 
+        align_corners=False)
+
       encoded = tf.image.encode_jpeg(
         decoded,
         format='rgb',
@@ -276,7 +282,11 @@ class ImageCoder(object):
         progressive=False,
         optimize_size=True,
         chroma_downsampling=True)
-      decoded, encoded = self._sess.run([decoded, encoded], feed_dict={self._decode_jpeg_data: image_data})
+
+      decoded = self._sess.run(decoded, feed_dict={self._decode_jpeg_data: image_data})
+ #     encoded = self._sess.run(encoded, feed_dict={self._decode_jpeg_data: image_data})
+      encoded = image_data
+
     else: 
       decoded = self._sess.run(decoded,
                              feed_dict={self._decode_jpeg_data: image_data})
